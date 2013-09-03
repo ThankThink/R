@@ -1,4 +1,4 @@
 R
 =
 
-my R code library
+the R code for my R course
