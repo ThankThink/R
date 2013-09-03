@@ -1,0 +1,159 @@
+#第九周作业
+library("quantmod")
+library("tseries")
+#从yahoo获取Oracle每日股价
+orcl<-get.hist.quote(instrument = "orcl",quote = "Close",provider="yahoo")
+#绘制每日曲线图
+plot(orcl$Close,col="black",type="l",yaxs='i',lwd=0.8,pch=16,xlab=NA,ylab="股价($)",xaxt="n",ylim=c(0,120),main="Oracle股票价格走势图")
+xlab<-format(ISOdate(1991:2013,1,1),'%Y-%m-%d')
+axis(side=1,las=2,at=as.Date(xlab),labels=xlab,cex.axis=0.6)
+
+#添加最高价及最低价标签
+grid(nx=20,ny=12,lwd=0.5,lty=3,col='grey')
+Max<-orcl$Close[which.max(orcl$Close)]
+Min<-orcl$Close[which.min(orcl$Close)]
+points(Max, pch=18, col="green")
+points(Min, pch=18, col="green")
+text(index(Max), as.numeric(Max), labels=paste(index(Max),":",as.character(Max),"$"), pos=4,cex=0.8, col="green")
+text(index(Min), as.numeric(Min), labels=paste(index(Min),":",as.character(Min),"$"), pos=4,cex=0.8, col="green")
+
+
+#第十周作业
+#8.1
+source("classification.R")
+TrnX1<-data.frame(x1=c(-1.9,-6.9,5.2,5.0,7.3,6.8,0.9,-12.5,1.5,3.8),
+              x2=c(3.2,10.4,2.0,2.5,0.0,12.7,-15.4,-2.5,1.3,6.8))
+TrnX2<-data.frame(x1=c(0.2,-0.1,0.4,2.7,2.1,-4.6,-1.7,-2.6,2.6,-2.8),
+              x2=c(0.2,7.5,14.6,8.3,0.8,4.3,10.9,13.1,12.8,10.0))
+TstX<-(8.1,2.0)
+#距离判别
+#假设TrnX1和TrnX2方差相同：明天下雨
+discriminiant.distance(TrnX1,TrnX2,TstX,var.equal=TRUE)
+
+#假设TrnX1和TrnX2方差不同：明天下雨
+discriminiant.distance(TrnX1,TrnX2,TstX)
+#Bayes判别
+#假设TrnX1和TrnX2方差相同：明天下雨
+discriminiant.bayes(TrnX1,TrnX2,TstX=TstX,var.equal=TRUE)
+#假设TrnX1和TrnX2方差不同：明天下雨
+discriminiant.bayes(TrnX1,TrnX2,TstX=TstX)
+
+#Fisher判别:明天下雨
+discriminiant.fisher(TrnX1,TrnX2,TstX)
+
+#8.2
+TrnX<-data.frame(x1=c(8.11,9.36,9.85,2.55,6.01,9.64,4.11,8.90,7.71,7.51,8.06,6.80,8.68,5.67,8.10,3.71,5.37,9.89,5.22,4.71,4.71,3.36,8.27),
+                 x2=c(261.01,185.39,249.58,137.13,231.34,231.38,260.25,259.91,273.84,303.59,231.03,308.90,258.69,355.54,476.69,316.32,274.57,409.42,330.34,331.47,352.50,347.31,189.56),
+                 x3=c(13.23,9.02,15.61,9.21,14.27,13.03,14.72,14.16,16.01,19.14,14.41,15.11,14.02,15.13,7.38,17.12,16.75,19.47,18.19,21.26,20.79,17.90,12.74),
+                 x4=c(7.36,5.99,6.11,4.35,8.79,8.53,10.02,9.79,8.79,8.53,6.15,8.49,7.16,9.43,11.32,8.17,9.67,10.49,9.61,13.72,11.00,11.19,6.94))
+TrnG<-as.factor(c(rep(1,11),rep(2,7),rep(3,5)))
+
+
+#距离判别：方差相同,分类正确率为78.26%
+distinguish.distance(TrnX,TrnG,var.equal=TRUE)
+rate<-as.numeric(as.character(TrnG))-distinguish.distance(TrnX,TrnG,var.equal=TRUE)
+ratio<-sum(rate==0)/length(TrnG)
+
+#距离判别：方差不同,分类正确率为78.26%
+distinguish.distance(TrnX,TrnG)
+rate<-as.numeric(as.character(TrnG))-distinguish.distance(TrnX,TrnG)
+ratio<-sum(rate==0)/length(TrnG)
+
+#Bayes判别：方差相同，先验概率为11／23，分类正确率为78.26%
+distinguish.bayes(TrnX,TrnG,p=rep(11/23,3),var.equal=TRUE)
+rate<-as.numeric(as.character(TrnG))-distinguish.bayes(TrnX,TrnG,p=rep(11/23,3),var.equal=TRUE)
+ratio<-sum(rate==0)/length(TrnG)
+
+#Bayes判别：方差相同，先验概率为7／23，分类正确率为78.26%
+distinguish.bayes(TrnX,TrnG,p=rep(7/23,3),var.equal=TRUE)
+rate<-as.numeric(as.character(TrnG))-distinguish.bayes(TrnX,TrnG,p=rep(7/23,3),var.equal=TRUE)
+ratio<-sum(rate==0)/length(TrnG)
+
+#Bayes判别：方差相同，先验概率为5／23，分类正确率为78.26%
+distinguish.bayes(TrnX,TrnG,p=rep(5/23,3),var.equal=TRUE)
+rate<-as.numeric(as.character(TrnG))-distinguish.bayes(TrnX,TrnG,p=rep(5/23,3),var.equal=TRUE)
+ratio<-sum(rate==0)/length(TrnG)
+
+#Bayes判别：方差不同，先验概率为11／23，分类正确率为73.91%
+distinguish.bayes(TrnX,TrnG,p=rep(11/23,3))
+rate<-as.numeric(as.character(TrnG))-distinguish.bayes(TrnX,TrnG,p=rep(11/23,3))
+ratio<-sum(rate==0)/length(TrnG)
+
+#Bayes判别：方差不同，先验概率为7／23，分类正确率为73.91%
+distinguish.bayes(TrnX,TrnG,p=rep(7/23,3))
+rate<-as.numeric(as.character(TrnG))-distinguish.bayes(TrnX,TrnG,p=rep(7/23,3))
+ratio<-sum(rate==0)/length(TrnG)
+
+#Bayes判别：方差不同，先验概率为5／23，分类正确率为73.91%
+distinguish.bayes(TrnX,TrnG,p=rep(5/23,3))
+rate<-as.numeric(as.character(TrnG))-distinguish.bayes(TrnX,TrnG,p=rep(5/23,3))
+ratio<-sum(rate==0)/length(TrnG)
+
+#由上可知，采用判别分类和贝叶斯分类（假定方差相同）时，分类的正确率是一样的，78.26%，当采用假定方差不同的贝叶斯分类时，
+#分类正确率为73.91%，可见本题中，前者分类效果比较好。
+
+
+
+#第十一周作业
+library("quantmod")
+library("tseries")
+#从yahoo获取apple,google,microsoft每日股票成交量
+apple<-get.hist.quote(instrument ="aapl",quote = "Volume",provider="yahoo",start="2008-01-01",end="2011-12-31")
+google<-get.hist.quote(instrument = "goog",quote = "Volume",provider="yahoo",start="2008-01-01",end="2011-12-31")
+micro<-get.hist.quote(instrument = "msft",quote = "Volume",provider="yahoo",start="2008-01-01",end="2011-12-31")
+#将每日成交量取年份
+apple.df<-cbind(as.data.frame(apple),year=format(index(apple),"%Y"))
+google.df<-cbind(as.data.frame(google),year=format(index(google),"%Y"))
+micro.df<-cbind(as.data.frame(micro),year=format(index(micro),"%Y"))
+#计算每年成交量总和
+apple.v<-tapply(as.numeric(apple.df$Volume),apple.df$year,sum)
+google.v<-tapply(as.numeric(google.df$Volume),google.df$year,sum)
+micro.v<-tapply(as.numeric(micro.df$Volume),micro.df$year,sum)
+test<-rbind(apple.v,google.v,micro.v)
+#将每年的成交量转化为总成交量占比
+rownames(test)<-c('apple','google','micro')
+test<-t(test/rowSums(test))
+rownames(test)
+
+#画图，添加数据标签
+x<-barplot(test,beside=TRUE,legend.text=rownames(test),args.legend=list(bty="n",horiz=FALSE))
+y<-test
+text(x,y-0.03,labels=sprintf("%.0f%%",y*100),cex=0.6)
+
+wo <- axTicks(2)
+axis(2, at=wo, labels=paste(format(round(wo*100,1),nsmall=1),"%",sep = "")) 
+
+
+
+
+
+total<-rbind(cbind(com='apple',apple.v),cbind(com='google',google.v),cbind(com='micro',micro.v))
+names(total)<-c('year','name','Volume')
+barplot(apple.v)
+
+
+barplot(total$Volume,border="white",ylab="Stocks Volume",main="Percentage Stocks Volume Annual")
+legend("right",legend=total$name,bty="n",inset=c(-0.3,0),fill=brewer.pal(5,"Set1"))
+barplot(total$Volume,legend=)
+
+
+
+
+barplot(apple.df)
+#绘制每日曲线图
+plot(orcl$Close,col="black",type="l",yaxs='i',lwd=0.8,pch=16,xlab=NA,ylab="股价($)",xaxt="n",ylim=c(0,120),main="Oracle股票价格走势图")
+xlab<-format(ISOdate(1991:2013,1,1),'%Y-%m-%d')
+axis(side=1,las=2,at=as.Date(xlab),labels=xlab,cex.axis=0.6)
+
+#添加最高价及最低价标签
+grid(nx=20,ny=12,lwd=0.5,lty=3,col='grey')
+Max<-orcl$Close[which.max(orcl$Close)]
+Min<-orcl$Close[which.min(orcl$Close)]
+points(Max, pch=18, col="green")
+points(Min, pch=18, col="green")
+text(index(Max), as.numeric(Max), labels=paste(index(Max),":",as.character(Max),"$"), pos=4,cex=0.8, col="green")
+text(index(Min), as.numeric(Min), labels=paste(index(Min),":",as.character(Min),"$"), pos=4,cex=0.8, col="green")
+
+
+
+
